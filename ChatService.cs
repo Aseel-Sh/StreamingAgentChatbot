@@ -17,7 +17,7 @@ public class ChatService
             new AuthenticationHeaderValue("Bearer", apiKey);
     }
 
-    public async Task<string> StreamChatAsync(List<object> messages)
+    public async Task<string> StreamChatAsync(List<ChatMessage> messages)
     {
         var requestBody = new
         {

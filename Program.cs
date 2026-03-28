@@ -11,7 +11,7 @@ if (string.IsNullOrWhiteSpace(apiKey))
 
 var chatService = new ChatService(apiKey);
 
-var messages = new List<object>();
+var messages = new List<ChatMessage>();
 
 while (true)
 {
@@ -24,19 +24,11 @@ while (true)
     if (userInput.ToLower() == "exit")
         break;
 
-    messages.Add(new
-    {
-        role = "user",
-        content = userInput
-    });
+    messages.Add(new ChatMessage("user", userInput));
 
     Console.Write("Assistant: ");
 
     var response = await chatService.StreamChatAsync(messages);
 
-    messages.Add(new
-    {
-        role = "assistant",
-        content = response
-    });
+    messages.Add(new ChatMessage("assistant", response));
 }
