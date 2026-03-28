@@ -13,6 +13,11 @@ var chatService = new ChatService(apiKey);
 
 var messages = new List<ChatMessage>();
 
+messages.Add(new ChatMessage(
+    "system",
+    "You are a helpful AI tutor. Explain concepts clearly, step by step, using simple language. Keep answers concise but informative."
+));
+
 while (true)
 {
     Console.Write("\nYou: ");
