@@ -1,5 +1,7 @@
 ﻿using StreamingAgentChatbot;
 
+const int maxMessages = 20;
+
 
 var apiKey = Environment.GetEnvironmentVariable("OPENROUTER_API_KEY");
 
@@ -36,4 +38,10 @@ while (true)
     var response = await chatService.StreamChatAsync(messages);
 
     messages.Add(new ChatMessage("assistant", response));
+
+
+    if (messages.Count > maxMessages)
+    {
+        messages.RemoveAt(1);
+    }
 }
