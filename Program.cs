@@ -26,14 +26,15 @@ while (true)
     if (string.IsNullOrWhiteSpace(userInput))
         continue;
 
+    if (userInput.ToLower() == "exit")
+        break;
+
+
     messages.Add(new
     {
         role = "user",
         content = userInput
     });
-
-    if (userInput.ToLower() == "exit")
-        break;
 
     var requestBody = new
     {
@@ -57,6 +58,8 @@ while (true)
     using var reader = new StreamReader(stream);
 
     Console.WriteLine("Assistant:");
+
+    var fullResponse = new StringBuilder();
 
     while (!reader.EndOfStream)
     {
@@ -93,10 +96,18 @@ while (true)
 
         if (delta.TryGetProperty("content", out var chunk))
         {
-            Console.Write(chunk.GetString());
+            var text = chunk.GetString();
+            Console.Write(text);
+            fullResponse.Append(text);
         }
 
     }
+
+    messages.Add(new
+    {
+        role = "assistant",
+        content = fullResponse.ToString()
+    });
 
     //Console.WriteLine();
 }
