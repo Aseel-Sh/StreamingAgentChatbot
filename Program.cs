@@ -1,7 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.IO;
-using System.Text;
-using System.Text.Json;
+﻿using StreamingAgentChatbot;
 
 
 var apiKey = Environment.GetEnvironmentVariable("OPENROUTER_API_KEY");
@@ -12,9 +9,7 @@ if (string.IsNullOrWhiteSpace(apiKey))
     return;
 }
 
-using var httpClient = new HttpClient();
-
-httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+var chatService = new ChatService(apiKey);
 
 var messages = new List<object>();
 
@@ -29,85 +24,19 @@ while (true)
     if (userInput.ToLower() == "exit")
         break;
 
-
     messages.Add(new
     {
         role = "user",
         content = userInput
     });
 
-    var requestBody = new
-    {
-        model = "stepfun/step-3.5-flash:free",
-        stream = true,
-        messages = messages
-    };
+    Console.Write("Assistant: ");
 
-    var json = JsonSerializer.Serialize(requestBody);
-
-    using var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-    var request = new HttpRequestMessage(HttpMethod.Post, "https://openrouter.ai/api/v1/chat/completions")
-    {
-        Content = content
-    };
-
-    var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-
-    var stream = await response.Content.ReadAsStreamAsync();
-    using var reader = new StreamReader(stream);
-
-    Console.WriteLine("Assistant:");
-
-    var fullResponse = new StringBuilder();
-
-    while (!reader.EndOfStream)
-    {
-        var line = await reader.ReadLineAsync();
-
-        if (string.IsNullOrWhiteSpace(line))
-        {
-            continue;
-        }
-
-        if (!line.StartsWith("data:"))
-        {
-            continue;
-        }
-
-        var jsonChunk = line.Substring("data:".Length).Trim();
-
-        if (jsonChunk == "[DONE]")
-        {
-            break;
-        }
-
-        using var doc = JsonDocument.Parse(jsonChunk);
-
-        var root = doc.RootElement;
-
-        if (!root.TryGetProperty("choices", out var choices))
-            continue;
-
-        var firstChoice = choices[0];
-
-        if (!firstChoice.TryGetProperty("delta", out var delta))
-            continue;
-
-        if (delta.TryGetProperty("content", out var chunk))
-        {
-            var text = chunk.GetString();
-            Console.Write(text);
-            fullResponse.Append(text);
-        }
-
-    }
+    var response = await chatService.StreamChatAsync(messages);
 
     messages.Add(new
     {
         role = "assistant",
-        content = fullResponse.ToString()
+        content = response
     });
-
-    //Console.WriteLine();
 }
