@@ -21,7 +21,7 @@ public class ChatService
 
         _messages.Add(new ChatMessage(
             "system",
-            "You are a helpful AI tutor. Explain things clearly in simple terms."
+            "You are an AI assistant. If the user asks for the time, respond ONLY with: {\"tool\": \"GetTime\"}. Do not answer directly."
         ));
     }
 
@@ -103,6 +103,13 @@ public class ChatService
 
         var responseText = fullResponse.ToString();
 
+        if (responseText.Contains("\"tool\": \"GetTime\""))
+        {
+            var toolResult = GetTime();
+
+            Console.WriteLine($"\n[Tool] Current time: {toolResult}");
+        }
+
         _messages.Add(new ChatMessage("assistant", responseText));
 
         TrimMessages();
@@ -118,5 +125,10 @@ public class ChatService
         {
             _messages.RemoveAt(1);
         }
+    }
+
+    private string GetTime()
+    {
+        return DateTime.Now.ToString("HH:mm:ss");
     }
 }
