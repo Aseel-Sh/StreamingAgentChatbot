@@ -8,6 +8,8 @@ namespace StreamingAgentChatbot;
 
 public class ChatService
 {
+    private readonly List<ChatMessage> _messages = new();
+
     private readonly HttpClient _httpClient;
 
     public ChatService(string apiKey)
@@ -15,15 +17,24 @@ public class ChatService
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", apiKey);
+
+
+        _messages.Add(new ChatMessage(
+            "system",
+            "You are a helpful AI tutor. Explain things clearly in simple terms."
+        ));
     }
 
-    public async Task<string> StreamChatAsync(List<ChatMessage> messages)
+    public async Task<string> SendMessageAsync(string userInput)
     {
+
+        _messages.Add(new ChatMessage("user", userInput));
+
         var requestBody = new
         {
             model = "stepfun/step-3.5-flash:free",
             stream = true,
-            messages = messages
+            messages = _messages
         };
 
         var json = JsonSerializer.Serialize(requestBody);
@@ -90,6 +101,22 @@ public class ChatService
 
         Console.WriteLine();
 
-        return fullResponse.ToString();
+        var responseText = fullResponse.ToString();
+
+        _messages.Add(new ChatMessage("assistant", responseText));
+
+        TrimMessages();
+
+        return responseText;
+    }
+
+    private void TrimMessages()
+    {
+        const int maxMessages = 20;
+
+        while (_messages.Count > maxMessages)
+        {
+            _messages.RemoveAt(1);
+        }
     }
 }
