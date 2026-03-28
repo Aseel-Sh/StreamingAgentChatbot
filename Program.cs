@@ -16,6 +16,8 @@ using var httpClient = new HttpClient();
 
 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
+var messages = new List<object>();
+
 while (true)
 {
     Console.Write("\nYou: ");
@@ -24,6 +26,12 @@ while (true)
     if (string.IsNullOrWhiteSpace(userInput))
         continue;
 
+    messages.Add(new
+    {
+        role = "user",
+        content = userInput
+    });
+
     if (userInput.ToLower() == "exit")
         break;
 
@@ -31,15 +39,7 @@ while (true)
     {
         model = "stepfun/step-3.5-flash:free",
         stream = true,
-        messages = new[]
-    {
-            new
-            {
-                role = "user",
-                content = userInput
-            }
-
-        }
+        messages = messages
     };
 
     var json = JsonSerializer.Serialize(requestBody);
