@@ -2,6 +2,7 @@
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;
+using System.Text;
 
 
 namespace StreamingAgentChatbot;
@@ -37,8 +38,19 @@ public class AgentService
 
     public async Task<string> SendAsync(string input)
     {
-        var response = await _agent.RunAsync(input);
+        var fullResponse = new StringBuilder();
 
-        return response.Text;
+        await foreach (var update in _agent.RunStreamingAsync(input))
+        {
+            if (update.Text is not null)
+            {
+                Console.Write(update.Text);
+                fullResponse.Append(update.Text);
+            }
+        }
+
+        Console.WriteLine();
+
+        return fullResponse.ToString();
     }
 }
