@@ -21,7 +21,6 @@ while (true)
     if (input.ToLower() == "exit")
         break;
 
-    var response = await agentService.SendAsync(input);
-
-    Console.WriteLine($"Assistant: {response}");
+    Console.Write("Assistant: ");
+    await agentService.SendAsync(input);
 }

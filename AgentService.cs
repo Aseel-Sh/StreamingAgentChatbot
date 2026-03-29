@@ -10,6 +10,7 @@ namespace StreamingAgentChatbot;
 public class AgentService
 {
     private readonly AIAgent _agent;
+    private AgentSession? _session;
 
     public AgentService(string apiKey)
     {
@@ -38,9 +39,11 @@ public class AgentService
 
     public async Task<string> SendAsync(string input)
     {
+        _session ??= await _agent.CreateSessionAsync();
+
         var fullResponse = new StringBuilder();
 
-        await foreach (var update in _agent.RunStreamingAsync(input))
+        await foreach (var update in _agent.RunStreamingAsync(input, _session))
         {
             if (update.Text is not null)
             {
