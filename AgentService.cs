@@ -25,16 +25,11 @@ public class AgentService
             .GetChatClient("stepfun/step-3.5-flash:free")
             .AsIChatClient();
 
-        _agent = new ChatClientAgent(
-            chatClient,
-            new ChatClientAgentOptions
-            {
-                Name = "Assistant",
-                ChatOptions = new ChatOptions
-                {
-                    Instructions = "You are a helpful AI tutor. Explain things simply."
-                }
-            });
+        _agent = chatClient.AsAIAgent(
+            instructions: "You are a helpful AI tutor. Explain things simply. Use tools when needed.",
+            name: "Assistant",
+            tools: [AIFunctionFactory.Create(GetTime, name: nameof(GetTime))]
+        );
     }
 
     public async Task<string> SendAsync(string input)
@@ -55,5 +50,10 @@ public class AgentService
         Console.WriteLine();
 
         return fullResponse.ToString();
+    }
+
+    private string GetTime()
+    {
+        return DateTime.Now.ToString("HH:mm:ss");
     }
 }
