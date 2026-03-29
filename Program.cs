@@ -8,19 +8,20 @@ if (string.IsNullOrWhiteSpace(apiKey))
     return;
 }
 
-var chatService = new ChatService(apiKey);
+var agentService = new AgentService(apiKey);
 
 while (true)
 {
     Console.Write("\nYou: ");
-    var userInput = Console.ReadLine();
+    var input = Console.ReadLine();
 
-    if (string.IsNullOrWhiteSpace(userInput))
+    if (string.IsNullOrWhiteSpace(input))
         continue;
 
-    if (userInput.ToLower() == "exit")
+    if (input.ToLower() == "exit")
         break;
 
-    Console.Write("Assistant: ");
-    await chatService.SendMessageAsync(userInput);
+    var response = await agentService.SendAsync(input);
+
+    Console.WriteLine($"Assistant: {response}");
 }
